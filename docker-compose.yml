@@ -14,24 +14,19 @@ services:
       - --overprovisioned
       - --node-id
       - '1'
-      - kafka-addr
-      - PLAINTEXT://0.0.0.0:29092, OUTSIDE://0.0.0.0:9092
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
       - --advertise-kafka-addr
-      - PLAINTEXT://redpanda-1:29092, OUTSIDE://localhost:9092
+      - PLAINTEXT://redpanda-1:29092,OUTSIDE://localhost:9092
       - --pandaproxy-addr
-      - PLAINTEXT://redpanda-1:28082, OUTSIDE://LOCALHOST:8082
+      - PLAINTEXT://redpanda-1:28082,OUTSIDE://LOCALHOST:8082
       - --rpc-addr
       - 0.0.0.0:33145
       - --advertise-rpc-addr
       - redpanda-1:33145
 
-
-
-
     image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
     container_name: redpanda-1
-    #volumes:
-     # - redpanda-0:/var/lib/redpanda/data
     networks:
       - redpanda_network
     ports:
@@ -53,20 +48,19 @@ services:
       - --overprovisioned
       - --node-id
       - '2'
-      - --seedse
+      - --seeds
       - redpanda-1:33145
-      - kafka-addr
-      - PLAINTEXT://0.0.0.0:29093, OUTSIDE://0.0.0.0:9093
+      - --kafka-addr
+      - PLAINTEXT://0.0.0.0:29093,OUTSIDE://0.0.0.0:9093
       - --advertise-kafka-addr
-      - PLAINTEXT://redpanda-2:29093, OUTSIDE://localhost:9093
+      - PLAINTEXT://redpanda-2:29093,OUTSIDE://localhost:9093
       - --pandaproxy-addr
-      - PLAINTEXT://0.0.0.0:28083, OUTSIDE://0.0.0.0:8083
-      - --pandaproxy-addr
-      - PLAINTEXT://redpanda-2:28083, OUTSIDE://LOCALHOST:8083
+      - PLAINTEXT://redpanda-2:28083,OUTSIDE://localhost:8083
       - --rpc-addr
       - 0.0.0.0:33146
       - --advertise-rpc-addr
       - redpanda-2:33146
+
 
     networks:
       - redpanda_network
@@ -74,10 +68,6 @@ services:
       - 8083:8083
       - 9093:9093
       - 28083:28083
-
-
-
-
 
   console:
     container_name: redpanda-console
@@ -90,20 +80,19 @@ services:
       CONFIG_FILEPATH: /tmp/config.yml
       CONSOLE_CONFIG_FILE: |
         kafka:
-          brokers: ["redpanda-1:29092",redpanda-2:29092]
+          brokers: ["redpanda-1:29092", "redpanda-2:29092"]
           schemaRegistry:
             enabled: false
         redpanda:
           adminApi:
             enabled: true
-            urls: ["http://redpanda-1:9644","http://redpanda-2:9644"]
+            urls: ["http://redpanda-1:9644", "http://redpanda-2:9644"]
         connect:
-          enabled:false       
+          enabled: false
     ports:
       - 8080:8080
     depends_on:
       - redpanda-1
-
 
   jobmanager:
     container_name: jobmanager
@@ -142,17 +131,17 @@ services:
       context: .
       dockerfile: Dockerfile-sql
     command:
-    - /opt/flink/bin/sql-client.sh
-    - embedded
-    - '-1'
-    - /opt/sql-client/lib
+      - /opt/flink/bin/sql-client.sh
+      - embedded
+      - '-1'
+      - /opt/sql-client/lib
     depends_on:
       - jobmanager
     environment:
-          - FLINK_JOBMANAGER_HOST=jobmanager
-          - |
-            FLINK_PROPERTIES=
-            jobmanager.rpc.address: jobmanager
-            rest.address:jobmanager
+      - FLINK_JOBMANAGER_HOST=jobmanager
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        rest.address: jobmanager
     networks:
       - redpanda_network

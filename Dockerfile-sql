@@ -14,6 +14,6 @@ RUN wget -P /opt/sql-client/lib/ https://repo.maven.apache.org/maven2/org/apache
 WORKDIR /opt/sql-client
 ENV SQL_CLIENT_HOME /opt/sql-client
 
-COPY docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
-ENTRYPOINT ["/docker-entrypoint.sh"]
+COPY docker-entrypoint.sh /opt/sql-client
+RUN chmod +x /opt/sql-client/docker-entrypoint.sh
+ENTRYPOINT ["/opt/sql-client/docker-entrypoint.sh"]
