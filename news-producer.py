@@ -6,6 +6,7 @@ from alpaca_trade_api import REST
 from alpaca.common import Sort
 from typing import List
 from alpaca_config.keys import config
+from utils import get_sentiment
 
 def get_producer(brokers: List[str]):
     producer = KafkaProducer(
@@ -39,7 +40,7 @@ def produce_historical_news(
             symbol=symbol,
             start=start_date,
             end=end_date,
-            limit=1000,
+            limit=10000,
             sort=Sort.ASC,
             include_content=False,
 
@@ -47,7 +48,7 @@ def produce_historical_news(
         )
 
         for i,row in enumerate(news):
-            article=row._row
+            article=row._raw
             should_proceed=any(term in article['headline'] for term in symbols)
             if not should_proceed:
                 continue
@@ -57,7 +58,24 @@ def produce_historical_news(
             article['timestamp']=timestamp.strftime('%Y-%m-%d %H:%M:%S')
             article['timestamp_ms']=timestamp_ms
             article['data_provider']='alpaca'
-            article['sentinent'] = get_sentinent(article['headline'])
+            article['sentinent'] = get_sentiment(article['headline'])
+            article.pop('symbols')
+            article['symbol']=symbol
+            try:
+                future=redpanda_client.send(
+                    topic=topic,
+                    key=symbol,
+                    value=article,
+                    timestamp_ms=timestamp_ms
+                )
+
+                _=future.get(timeout=10)
+                print(f'Sent {i+1} articles to {topic}')
+            except Exception as e:
+                print(f"Failed to send article: {article}")
+                print(e)
+            
+
 
 if __name__=='__main__':
     produce_historical_news(
@@ -65,7 +83,7 @@ if __name__=='__main__':
         topic='market-news',
         start_date='2024-01-01',
         end_date='2024-06-01',
-        symbols=['NVDA','NVDA']
+        symbols=['NVDA','AAPL','TSLA']
     )
 
 

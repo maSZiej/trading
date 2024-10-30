@@ -1,3 +1,5 @@
 env/
 secretkeyalpaca.txt
 alpaca_config/
+__pycache__
+main.py
