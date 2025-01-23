@@ -11,4 +11,4 @@ COPY . /app
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Domyślny punkt wejścia dla kontenera
-CMD ["python", "producer.py"]
+CMD ["python", "rl-news-producer.py"]
