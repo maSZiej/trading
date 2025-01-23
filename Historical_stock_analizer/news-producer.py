@@ -6,7 +6,8 @@ from alpaca_trade_api import REST
 from alpaca.common import Sort
 from typing import List
 from alpaca_config.keys import config
-from utils import get_sentiment
+from utils import get_sentiment,get_advanced_sentiment
+
 
 def get_producer(brokers: List[str]):
     producer = KafkaProducer(
@@ -42,7 +43,7 @@ def produce_historical_news(
             end=end_date,
             limit=10000,
             sort=Sort.ASC,
-            include_content=False,
+            include_content=True,
 
 
         )
@@ -81,13 +82,13 @@ if __name__=='__main__':
     produce_historical_news(
         get_producer(config['redpanda_brokers']),
         topic='market-news',
-        start_date='2024-01-01',
-        end_date='2024-06-01',
-        symbols=['NVDA','AAPL','TSLA']
+        start_date='2024-12-01',
+        end_date='2024-12-30',
+        symbols=['TSLA']
     )
 
 
-
+#'NVDA','AAPL',
 
 
 

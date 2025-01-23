@@ -1,0 +1,14 @@
+# Wybierz obraz bazowy z Pythonem
+FROM python:3.9-slim
+
+# Ustaw katalog roboczy w kontenerze
+WORKDIR /app
+
+# Skopiuj pliki aplikacji do kontenera
+COPY . /app
+
+# Instalacja zależności (np. Kafka Python, Alpaca API)
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Domyślny punkt wejścia dla kontenera
+CMD ["python", "producer.py"]

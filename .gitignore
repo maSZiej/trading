@@ -3,3 +3,7 @@ secretkeyalpaca.txt
 alpaca_config/
 __pycache__
 main.py
+lib/
+test/
+1-augmentacja_danych.ipynb
+data_flink.py

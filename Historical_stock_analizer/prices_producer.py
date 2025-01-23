@@ -42,15 +42,33 @@ def produce_historical_price(
     prices_df=api.get_stock_bars(request_params).df
     prices_df.reset_index(inplace=True)
 
-    print(prices_df.head())
+    records=json.loads(prices_df.to_json(orient='records'))
+
+    for idx,record in enumerate(records):
+        record['provider']='alpaca'
+
+        try:
+            future=redpanda_client.send(
+            topic=topic,
+            key=record['symbol'],
+            value=record,
+            timestamp_ms=record['timestamp']
+            )
+            _=future.get(timeout=10)    
+            print(f'Record sen succesfully')
+        except Exception as e:
+            print(f'Error sending message for symbol {symbol}:{e.__class__.__name__}-{e}')
 
 if __name__ == '__main__':
     redpanda_client=get_producer(config['redpanda_brokers'])
     produce_historical_price(
         redpanda_client,
         topic='stock-prices',
-        start_date='2024-01-01',
-        end_date='2024-06-01',
-        symbol='NVDA'
+        start_date='2024-12-01',
+        end_date='2024-12-31',
+        symbol='TSLA'
     )
     redpanda_client.close()
+
+
+   # 'NVDA','AAPL',
